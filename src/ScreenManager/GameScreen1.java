@@ -1,8 +1,9 @@
 package ScreenManager;
 
 import Collisions.CollisionManager;
+import Player.Player;
 import Player.Player1;
-import Player.Player2;
+import Player.Players;
 import ScreenManager.Elements.Image;
 import Util.SocketHandle;
 import Util.LevelLoader;
@@ -66,7 +67,9 @@ public class GameScreen1 extends Screen {
 		}
 
 		Player1.image.draw(Player1.image.x, Player1.image.y, 1.5f);
-		Player2.image.draw(Player2.image.x, Player2.image.y, 1.5f);
+		for(Player Player2 : Players.players){
+			Player2.image.draw(Player2.image.x, Player2.image.y, 1.5f);
+		}
 
 		fish.draw(400, Display.getHeight() - 160 - fish.getHeight() * 1.5f, 1f);
 		// g.setColor(new Color(0, 0, 0));
@@ -95,8 +98,7 @@ public class GameScreen1 extends Screen {
 		// Interactables
 		Player1.image = new Image("Images/Penguin.png", this);
 		Player1.image.setFilter(FILTER_NEAREST);
-		Player2.image = new Image("Images/Penguin.png", this);
-		Player2.image.setFilter(FILTER_NEAREST);
+		Players.init(this, this.collidables);
 		fish = new Image("Images/Fish.png", this);
 
 		// Backgrounds or props
@@ -116,12 +118,10 @@ public class GameScreen1 extends Screen {
 
 		this.collidables.remove(bg);
 		this.collidables.remove(Player1.image);
-		this.collidables.remove(Player2.image);
 
 		Player1.image.x = 10;
 		Player1.image.y = Display.getHeight() - 103 - Player1.image.getHeight()
 				* 1.5f;
-		Player2.image.x = 10;
 		Player1.lava.y = Display.getHeight() + 20;
 
 	}

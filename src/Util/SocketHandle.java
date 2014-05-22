@@ -2,15 +2,13 @@ package Util;
 
 import Collisions.CollisionManager;
 import Player.Player1;
-import Player.Player2;
+import Player.Players;
 import ScreenManager.ScreenManager;
 import io.socket.IOAcknowledge;
 import io.socket.IOCallback;
 import io.socket.SocketIO;
 import io.socket.SocketIOException;
 import ScreenManager.Elements.Image;
-
-
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,7 +32,7 @@ public class SocketHandle {
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
-		
+
 		socket.connect(new IOCallback() {
 			@Override
 			public void onMessage(JSONObject json, IOAcknowledge ack) {
@@ -84,14 +82,15 @@ public class SocketHandle {
 					// If the recieved event is newpos then reset the other
 					// player's info.
 					if (event.equals("newpos")) {
-						Player2.setx(Integer.valueOf(json.get("x").toString()));
-						Player2.sety(Integer.valueOf(json.get("y").toString()));
+						int x = (Integer.valueOf(json.get("x").toString()));
+						int y = (Integer.valueOf(json.get("y").toString()));
+						int id = (Integer.valueOf(json.get("id").toString()));
+						Players.setPlayer(id, x, y);
 
 						// If this is a client then also reset the Lava level
 						// and timer
 						if (!server) {
-							Player1.lava.y = Integer.valueOf(json.get("lava")
-									.toString());
+							Player1.lava.y = Integer.valueOf(json.get("lava").toString());
 							Player1.Ticks = 0;
 							Player1.lavacheck();
 						}
@@ -107,8 +106,7 @@ public class SocketHandle {
 						if (status == "restart")
 							ScreenManager.restartGame();
 						if (status.equals("newId")) {
-							clientId = Integer.valueOf(json.get("id")
-									.toString());
+							clientId = Integer.valueOf(json.get("id").toString());
 							if (clientId == 0) {
 								server = true;
 								Log.println("server");
@@ -119,17 +117,19 @@ public class SocketHandle {
 							}
 						}
 
-					}else if (event.equals("tackle")){
+					} else if (event.equals("tackle")) {
 						int range = Integer.valueOf(json.get("range").toString());
-						
-							Rectangle area = new Rectangle((int) Player2.image.x + range, (int) Player2.image.y, (int)( Player2.image.getWidth()*1.5), (int)( Player2.image.getHeight()*1.5));
-							if(CollisionManager.isCollided(Player1.image, area)){
-								if(range > 0)
-									Player1.horizontalSpeed += 10;
-								else 
-									Player1.horizontalSpeed -= 10;
+						int id = (Integer.valueOf(json.get("id").toString()));
+						Image image = Players.getPlayer(id);
+						Rectangle area = new Rectangle((int) image.x + range, (int) image.y, (int) (image.getWidth() * 1.5),
+								(int) (image.getHeight() * 1.5));
+						if (CollisionManager.isCollided(Player1.image, area)) {
+							if (range > 0)
+								Player1.horizontalSpeed += 10;
+							else
+								Player1.horizontalSpeed -= 10;
 
-							}
+						}
 					}
 				} catch (JSONException e) {
 					e.printStackTrace();
@@ -139,11 +139,13 @@ public class SocketHandle {
 		});
 
 	}
-	public static void disconnect(){
+
+	public static void disconnect() {
 		if (socket != null)
 			socket.disconnect();
 		socket = null;
 	}
+
 	public static Boolean lava = true;
 	public static int clientId = -1;
 
